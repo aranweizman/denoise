@@ -1,5 +1,5 @@
 import cv2
-import copy
+
 
 #  region Constants
 IMAGE_PATH = 'images/monkey.jpeg'
@@ -7,7 +7,12 @@ HEIGHT = 0
 WIDTH = 1
 CHANNEL_COUNT = 3
 
-GAMMA = 0.5
+BLUE = 0
+GREEN = 1
+RED = 2
+
+KERNEL_SIGMA_X = 80
+KERNEL_SIGMA_Y = 80
 #  endregion
 
 
@@ -16,20 +21,29 @@ original = cv2.imread(IMAGE_PATH)
 dimensions = original.shape
 
 #  center coordinates
-center_x = original.shape[1] // 2
-center_y = original.shape[0] // 2
+center_x = original.shape[WIDTH] // 2
+center_y = original.shape[HEIGHT] // 2
 
-max_radius = (center_x ** 2 + center_y ** 2) ** 0.5
+# get 2D Gaussian kernel
+kernel_x = cv2.getGaussianKernel(original.shape[WIDTH], KERNEL_SIGMA_X)
+kernel_y = cv2.getGaussianKernel(original.shape[HEIGHT], KERNEL_SIGMA_Y)
 
-# darken image radially
-dark = copy.deepcopy(original)
-for i in range(dimensions[HEIGHT]):
-    for j in range(dimensions[WIDTH]):
+kernel = kernel_x.T * kernel_y
 
-        dark_factor = ((((i - center_y) ** 2 + (j - center_x) ** 2) ** 0.5) / max_radius) ** GAMMA
+# normalize kernel
+beta = kernel[0][0]  # beta subtraction
+kernel -= beta
 
-        for k in range(CHANNEL_COUNT):
-            dark[i][j][k] -= round(dark_factor * dark[i][j][k])  # darken pixel
+alpha = 1/(kernel[center_y][center_x])  # alpha factoring
+kernel = alpha * kernel
+
+# darken image by kernel
+split = cv2.split(original.copy())
+split[BLUE] = split[BLUE] * kernel
+split[GREEN] = split[GREEN] * kernel
+split[RED] = split[RED] * kernel
+
+dark = (cv2.merge(split)).astype('uint8')
 
 cv2.imshow('original', original)
 cv2.imshow('darkened', dark)
