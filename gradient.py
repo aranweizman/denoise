@@ -53,6 +53,7 @@ class Image:
             title = self.DEFAULT_IMAGE_TITLE
         cv2.imshow(title, self.img)
 
+        # wait for key and close
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -60,9 +61,10 @@ class Image:
 #  region Constants
 IMAGE_PATH = 'images/monkey.jpeg'
 
-KERNEL_SIGMA = 80
+KERNEL_SIGMA = 50
 #  endregion
 
+# implementation
 image = Image(IMAGE_PATH)
 image.darken(KERNEL_SIGMA)
 image.show()

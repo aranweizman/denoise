@@ -1,11 +1,7 @@
 import cv2
-import numpy as np
-from matplotlib import pyplot as plt
-import random
-import copy
 
 # region Constants
-IMAGE_PATH = 'images/monkey.jpeg'
+IMAGE_PATH = 'images/flowers.jpeg'
 
 HEIGHT = 0
 WIDTH = 1
@@ -21,22 +17,12 @@ NOISE_FLUCTUATION = 20
 original = cv2.imread(IMAGE_PATH)
 dimensions = original.shape
 
-# noise image
-noised = copy.deepcopy(original)
-for i in range(dimensions[HEIGHT]):
-    for j in range(dimensions[WIDTH]):
-        noised[i][j][BLUE] += random.randint(0, NOISE_FLUCTUATION)
-        noised[i][j][GREEN] += random.randint(0, NOISE_FLUCTUATION)
-        noised[i][j][RED] += random.randint(0, NOISE_FLUCTUATION)
-
-
-# denoise image
-denoise = cv2.fastNlMeansDenoisingColored(noised, None, 10, 10, 7, 21)
+# clear image
+clear = cv2.fastNlMeansDenoising(original, None, 15, 7, 21)
 
 # show images
+cv2.imshow('cleared', clear)
 cv2.imshow('original', original)
-cv2.imshow("noised", noised)
-cv2.imshow('denoised', denoise)
 
 # wait for key, and close
 cv2.waitKey(0)
